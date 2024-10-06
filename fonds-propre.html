@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Marché des Fonds Propres</title>
+    <link href="https://kineticgraphs.org/css/kg.0.2.7.css" rel="stylesheet" type="text/css">
+    <script src="https://kineticgraphs.org/js/kg.0.2.7.js"></script>
+</head>
+<body>
+
+Le Marché des fonds propres...
+
+<div class="kg-container">
+ 
+  schema: EconSchema
+  params:
+    - name: demandShift
+      value: 0
+      min: -5
+      max: 5
+      round: 0.1
+    - name: supplyShift
+      value: 0
+      min: -0.05
+      max: 0.05
+      round: 0.0001
+  calcs:
+    demandChanged: ((params.demandShift-0)^2 > 0.05)
+    supplyChanged: ((params.supplyShift-0)^2 > 0.001)
+  layout:
+    OneGraph:
+      graph:
+        xAxis:
+          title: Fonds propres (FP)
+        yAxis:
+          title: Taux d'intérêt mondial ($r^*$)
+          max: 0.1
+        objects:
+        - EconLinearEquilibrium:
+            demand:
+              name: oldDemand
+              label:
+                text: DFP
+                x: 8
+              xIntercept: 10
+              invSlope: -125
+              lineStyle: dotted
+              pts:
+              - name: a
+                y: 4
+            supply:
+              yIntercept: 0.01
+              slope: 0.01
+              lineStyle: dotted
+              label:
+                text: OFP
+                x: 8
+              pts:
+              - name: a
+                y: 4
+            equilibrium:
+              droplines:
+                vertical: S^*_0,I^*_0
+                horizontal: r^*_0
+        - EconLinearEquilibrium:
+            name: newEquilibrium
+            demand:
+              name: newDemand
+              xIntercept: 10 + params.demandShift
+              invSlope: -125
+              label:
+                text: DFP'
+                x: 8
+                show: (calcs.demandChanged || calcs.supplyChanged)
+              pts:
+              - name: a
+                y: 4
+              drag:
+                - horizontal: demandShift
+            supply:
+              name: newSupply
+              yIntercept: 0.01 - params.supplyShift
+              slope: 0.01
+              label:
+                text: OFP'
+                x: 8
+                show: (calcs.demandChanged || calcs.supplyChanged)
+              pts:
+              - name: a
+                y: 4
+              drag:
+                - horizontal: supplyShift
+            equilibrium:
+              show: (calcs.demandChanged || calcs.supplyChanged)
+              droplines:
+                vertical: S^*_1,I^*_1
+                horizontal: r^*_1           
+        - Arrow:
+           begin: [calcs.oldDemand.a.x,1]
+           end: [calcs.newDemand.a.x,1]
+           show: calcs.demandChanged
+           color: demand
+           trim: 0.1
+        - Arrow:
+           begin: [calcs.supply.a.x,0.1]
+           end: [calcs.newSupply.a.x,0.1]
+           show: calcs.supplyChanged
+           color: supply
+           trim: 0.01
+
+</div>
+
+</body>
+</html>
